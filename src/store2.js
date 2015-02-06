@@ -123,7 +123,18 @@
                 if (d != null && overwrite === false) {
                     return data;
                 }
-                return _.set(this._area, this._in(key), _.stringify(data), overwrite) || d;
+                try {
+                    return _.set(this._area, this._in(key), _.stringify(data), overwrite) || d;
+                } catch(e) {
+                    if (e.name === 'QUOTA_EXCEEDED_ERR' ||
+                    e.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+                    e.toString().indexOf("QUOTA_EXCEEDED_ERR") !== -1 ||
+                    e.toString().indexOf("QuotaExceededError") !== -1) {
+                        this.clearAll();
+                        return;
+                    }
+                    throw(e);
+                }
             },
             setAll: function(data, overwrite) {
                 var changed, val;

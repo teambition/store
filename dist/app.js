@@ -197,7 +197,7 @@ require.relative = function(parent) {
   return localRequire;
 };
 require.register("store/dist/store2.js", function(exports, require, module){
-/*! store2 - v2.2.0 - 2015-02-02
+/*! store2 - v2.2.0 - 2015-02-06
 * Copyright (c) 2015 Nathan Bubna; Licensed MIT, GPL */
 ;(function(window, define) {
     var _ = {
@@ -318,7 +318,18 @@ require.register("store/dist/store2.js", function(exports, require, module){
                 if (d != null && overwrite === false) {
                     return data;
                 }
-                return _.set(this._area, this._in(key), _.stringify(data), overwrite) || d;
+                try {
+                    return _.set(this._area, this._in(key), _.stringify(data), overwrite) || d;
+                } catch(e) {
+                    if (e.name === 'QUOTA_EXCEEDED_ERR' ||
+                    e.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+                    e.toString().indexOf("QUOTA_EXCEEDED_ERR") !== -1 ||
+                    e.toString().indexOf("QuotaExceededError") !== -1) {
+                        this.clearAll();
+                        return;
+                    }
+                    throw(e);
+                }
             },
             setAll: function(data, overwrite) {
                 var changed, val;
