@@ -46,12 +46,20 @@
             var store = _.inherit(_.storeAPI, function(key, data, overwrite) {
                 if (arguments.length === 0){ return store.getAll(); }
                 if (data !== undefined){ return store.set(key, data, overwrite); }
-                if (typeof key === "string"){ return store.get(key); }
+                if (typeof key === "string" || typeof key === "number"){ return store.get(key); }
                 if (!key){ return store.clear(); }
                 return store.setAll(key, data);// overwrite=data, data=key
             });
             store._id = id;
-            store._area = area || _.inherit(_.storageAPI, { items: {}, name: 'fake' });
+            try {
+                var testKey = '_safariPrivate_';
+                area.setItem(testKey, 'sucks');
+                store._area = area;
+                area.removeItem(testKey);
+            } catch (e) {}
+            if (!store._area) {
+                store._area = _.inherit(_.storageAPI, { items: {}, name: 'fake' });
+            }
             store._ns = namespace || '';
             if (!_.areas[id]) {
                 _.areas[id] = store._area;
@@ -223,14 +231,15 @@
     // safely setup store.session (throws exception in FF for file:/// urls)
     store.area("session", (function(){try{ return sessionStorage; }catch(e){}})());
 
+    //Expose store to the global object
+    window.store = store;
+
     if (typeof define === 'function' && define.amd !== undefined) {
         define(function () {
             return store;
         });
     } else if (typeof module !== 'undefined' && module.exports) {
         module.exports = store;
-    } else {
-        window.store = store;
     }
 
-})(window, window.define);
+})(this, this.define);
