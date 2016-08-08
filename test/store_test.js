@@ -18,10 +18,16 @@
     notStrictEqual(actual, expected, [message])
     throws(block, [expected], [message])
 */
-(function(store) {
+
+define(['store2'], function(store) {
+
+    var store = store.Store
+
+    console.log(store)
 
     var API = ['get', 'set', 'has', 'remove', 'each', 'namespace', 'area',
-               'getAll', 'setAll', 'keys', 'isFake', 'clear', 'clearAll', 'size'];
+            'getAll', 'setAll', 'keys', 'isFake', 'clear', 'clearAll', 'size'];
+
     function has(key, s, sn) {
         if (!s) {
             s = store;
@@ -119,127 +125,126 @@
     }
 
     var is_events = (window.location.href.indexOf('events=true') > -1);
-    window.onload = function() {
-        if (!is_events) {
 
-            // ensure we start blank
-            store.clearAll();
-            test("interface", function() {
-                ok(store, "store is present");
-                for (var i=0; i<API.length; i++) {
-                    has(API[i]);
-                }
-                has('version', store._);
-            });
+    if (!is_events) {
 
-            test("basics", function() {
-                clear();
-                deepEqual(store._id, 'local', 'id should be local');
-                ok(!store.isFake(), "is not faked");
-                save('foo','bar');
-                getAll({foo:'bar'});
-                update({fiz:'wiz',foo:true});
-                update('foo', false);
-                keys(['foo','fiz']);
-                each([['fiz','wiz'],['foo',false]]);
-                equal(store.size(), 2, "size should be 2");
-                remove('fiz', 'wiz');
-                remove('woogie', undefined);
-                get('foo', false);
-                clearAll();
-            });
-
-            test("namespace", function() {
-                save('foo', true);
-                var ns = space('test');
-                equal(ns+'', 'store.test[local]', "ns.toString()");
-                getAll({}, ns);
-                save('a', 'b', ns);
-                get('test.a', 'b');
-                each([['a','b']], ns);
-                each([['foo',true],['test.a','b']]);
-                each([], space('empty'));
-                save('test.', 'true', ns);
-                remove('test.test.', 'true');
-                get('foo', null, ns);
-                getAll({a:'b'}, ns);
-                update('a', 26.2, ns);
-                clear(ns);
-                getAll({foo:true});
-            });
-
-            test("areas", function() {
-                var local = area('local');
-                equal(local, store, 'store should equal store.local');
-                var session = area('session');
-                ok(session !== store, 'store should not equal store.session');
-                area('fake', true);
-            });
-
-            test("tricky for us", function() {
-                save(null, null);
-                save(undefined, 'undefined');
-                save(0, '0');
-                save([], '[]');
-                save({}, 0);
-                save({a:{b:true}}, false);
-                save(function a(){}, 'whatever');
-                clear();
-            });
-
-            //2011.06.09 these wreck most browsers localStorage interface
-            var is_firefox = (navigator.userAgent.toLowerCase().indexOf('firefox') > -1);
-            if (is_firefox) {
-            test("tricky for browsers", function() {
-                save('getItem', true);
-                save('setItem', 12.2);
-                save('clear', 'boo');
-                save('removeItem', 'hi');
-                save('key', {});
-                save('length', 1);
-                update('length', 2);
-                clear();
-            });
-            }
-        }
-
-        // clean slate before event tests
+        // ensure we start blank
         store.clearAll();
-
-        var is_http = (window.location.href.indexOf('file') !== 0),
-            is_modern = !!window.addEventListener;
-        if (is_http && is_modern) {
-            var events = store.namespace('events');
-            if (is_events) {
-                events('foo', {a:1,b:2});
-                events('foo', true);
-                events('bar', false);
-                events(0);
-            } else {
-                var foos = 1;
-                events.on('foo', function(e) {
-                    test("event "+e.key+foos, function() {
-                       equal('events', e.namespace, "e.namespace should be 'events'");
-                       equal('foo', e.key, "e.key should be 'foo'");
-                       ok(e.storageArea, "should have a storageArea");
-                       if (foos === 1) {
-                           ok(!e.oldValue, "shouldn't be any oldValue");
-                       } else if (foos === 2) {
-                           equal(2, e.oldValue.b, "oldValue should be object, not string");
-                           equal(true, e.newValue, "newValue should be true");
-                       } else if (foos === 3) {
-                           ok(!e.newValue, "shouldn't be any newValue");
-                       }
-                       foos++;
-                   });
-                });
-                var el = document.createElement('iframe');
-                el.src = window.location.href+'?events=true';
-                el.style.visibility = 'hidden';  
-                document.getElementsByTagName('body')[0].appendChild(el);
+        test("interface", function() {
+            ok(store, "store is present");
+            for (var i=0; i<API.length; i++) {
+                has(API[i]);
             }
+        });
+
+        test("basics", function() {
+            clear();
+            deepEqual(store._id, 'local', 'id should be local');
+            ok(!store.isFake(), "is not faked");
+            save('foo','bar');
+            getAll({foo:'bar'});
+            update({fiz:'wiz',foo:true});
+            update('foo', false);
+            keys(['foo','fiz']);
+            each([['fiz','wiz'],['foo',false]]);
+            equal(store.size(), 2, "size should be 2");
+            remove('fiz', 'wiz');
+            remove('woogie', undefined);
+            get('foo', false);
+            clearAll();
+        });
+
+        test("namespace", function() {
+            save('foo', true);
+            var ns = space('test');
+            equal(ns+'', 'store.test[local]', "ns.toString()");
+            getAll({}, ns);
+            save('a', 'b', ns);
+            get('test.a', 'b');
+            each([['a','b']], ns);
+            each([['foo',true],['test.a','b']]);
+            each([], space('empty'));
+            save('test.', 'true', ns);
+            remove('test.test.', 'true');
+            get('foo', null, ns);
+            getAll({a:'b'}, ns);
+            update('a', 26.2, ns);
+            clear(ns);
+            getAll({foo:true});
+        });
+
+        test("areas", function() {
+            var local = area('local');
+            equal(local, store, 'store should equal store.local');
+            var session = area('session');
+            ok(session !== store, 'store should not equal store.session');
+            area('fake', true);
+        });
+
+        test("tricky for us", function() {
+            save(null, null);
+            save(undefined, 'undefined');
+            save(0, '0');
+            save([], '[]');
+            save({}, 0);
+            save({a:{b:true}}, false);
+            save(function a(){}, 'whatever');
+            clear();
+        });
+
+        //2011.06.09 these wreck most browsers localStorage interface
+        var is_firefox = (navigator.userAgent.toLowerCase().indexOf('firefox') > -1);
+        if (is_firefox) {
+        test("tricky for browsers", function() {
+            save('getItem', true);
+            save('setItem', 12.2);
+            save('clear', 'boo');
+            save('removeItem', 'hi');
+            save('key', {});
+            save('length', 1);
+            update('length', 2);
+            clear();
+        });
         }
+    }
 
-    };// end window.onload
+    // clean slate before event tests
+    store.clearAll();
 
-}(window.store));
+    var is_http = (window.location.href.indexOf('file') !== 0),
+        is_modern = !!window.addEventListener;
+    if (is_http && is_modern) {
+        var events = store.namespace('events');
+        if (is_events) {
+            events('foo', {a:1,b:2});
+            events('foo', true);
+            events('bar', false);
+            events(0);
+        } else {
+            var foos = 1;
+            events.on('foo', function(e) {
+                test("event "+e.key+foos, function() {
+                    equal('events', e.namespace, "e.namespace should be 'events'");
+                    equal('foo', e.key, "e.key should be 'foo'");
+                    ok(e.storageArea, "should have a storageArea");
+                    if (foos === 1) {
+                        ok(!e.oldValue, "shouldn't be any oldValue");
+                    } else if (foos === 2) {
+                        equal(2, e.oldValue.b, "oldValue should be object, not string");
+                        equal(true, e.newValue, "newValue should be true");
+                    } else if (foos === 3) {
+                        ok(!e.newValue, "shouldn't be any newValue");
+                    }
+                    foos++;
+                });
+            });
+            var el = document.createElement('iframe');
+            el.src = window.location.href+'?events=true';
+            el.style.visibility = 'hidden';
+            document.getElementsByTagName('body')[0].appendChild(el);
+        }
+    }
+
+    QUnit.start();
+
+})

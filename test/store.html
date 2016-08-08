@@ -6,16 +6,23 @@
   <!-- Load local QUnit. -->
   <link rel="stylesheet" href="../libs/qunit/qunit.css" media="screen">
   <script src="../libs/qunit/qunit.js"></script>
+  <script src="../libs/requirejs.js" ></script>
   <!-- Load local lib and tests. -->
-  <script src="../src/store2.js"></script>
-  <script src="../src/store.bind.js"></script>
-  <script src="../src/store.cache.js"></script>
-  <script src="../src/store.old.js"></script>
-  <script src="../src/store.overflow.js"></script>
-  <script src="../src/store.quota.js"></script>
-  <script src="../src/store.measure.js"></script>
-  <!--script src="../src/store.onlyreal.js"></script-->
-  <script src="store_test.js"></script>
+  <script type="text/javascript">
+
+    QUnit.config.autostart = false;
+    QUnit.config.autoload = false;
+
+    requirejs.config({
+      paths: {
+        "store2": "../dist/store2",
+        "test": "store_test"
+      }
+    })
+
+    require(['test'], function() {});
+
+  </script>
 </head>
 <body>
   <div id="qunit"></div>
