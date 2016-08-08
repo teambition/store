@@ -1,6 +1,6 @@
 export interface IStoreAPI {
     area: (id: any, area: any) => any;
-    namespace: (ns: any) => any;
+    namespace: (ns: any) => IStoreAPI;
     isFake: () => boolean;
     toString: () => string;
     has: (key: any) => any;
