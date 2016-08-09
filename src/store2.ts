@@ -1,30 +1,40 @@
-export interface IStoreAPI {
-  area: (id: any, area: any) => any
-  namespace: (ns: any) => IStoreAPI
+export interface IStore extends IStoreAPI {
+  (key?: string, data?: string, overwrite?: boolean): any
+  _?: I_
+}
+
+interface IStoreAPI {
+  area: (id: string, area: IStorageAPI) => IStorageAPI
+  namespace: (ns: string) => IStore
   isFake: () => boolean
   toString: () => string
-  has: (key: any) => any
-  size: () => any
-  each: (fn: any, and: any) => any
-  keys: () => any
-  get: (key: any, alt: any) => any
-  getAll: () => any
-  set: (key: any, data: any, overwrite: any) => any
-  setAll: (data: any, overwrite: any) => any
-  remove: (key: any) => any
-  clear: () => any
-  clearAll: () => any
+  has: (key: string) => boolean
+  size: () => number
+  each: <T>(fn: any, and?: T) => T | IStore
+  keys: () => string[]
+  get: (key: string | number, alt?: string) => string | Object
+  getAll: () => string
+  set: (key: string, data: any, overwrite?: boolean) => string
+  setAll: (data: any, overwrite?: boolean) => string
+  remove: (key: string) => string
+  clear: () => IStore
+  clearAll: () => IStore
+  _id?: string
+  _ns?: string
+  _area?: IStorageAPI
   _in: (k: any) => any
   _out: (k: any) => any
 }
 
 interface IStorageAPI {
   length: number
-  has: (k: any) => any
-  key: (i: any) => any
-  setItem: (k: any, v: any) => void
-  removeItem: (k: any) => void
-  getItem: (k: any) => any
+  name?: string
+  items?: {}
+  has: (k: string) => string
+  key: (i: number) => string
+  setItem: (k: string, v: string) => void
+  removeItem: (k: string) => void
+  getItem: (k: string) => string
   clear: () => void
   toString: () => string
 }
@@ -32,26 +42,20 @@ interface IStorageAPI {
 interface I_ {
   areas: {}
   apis: {}
-  inherit: (api: any, o: any) => any
-  stringify: (d: any) => string
-  parse: (s: any) => any
-  fn: (name: any, fn: any) => void
-  get: (area: any, key: any) => any
-  set: (area: any, key: any, string: any) => void
-  remove: (area: any, key: any) => void
-  key: (area: any, i: any) => any
-  length: (area: any) => any
-  clear: (area: any) => void
-  Store: (id: any, area: any, namespace?: any) => any
+  inherit: <T>(api: Object, o: any) => T
+  stringify: (d: Object) => string
+  parse: (s: string) => Object
+  fn: (name: string, fn: any) => void
+  get: (area: IStorageAPI, key: string) => string
+  set: (area: IStorageAPI, key: string, string: string) => void
+  remove: (area: IStorageAPI, key: string) => void
+  key: (area: IStorageAPI, i: number) => string
+  length: (area: IStorageAPI) => number
+  clear: (area: IStorageAPI) => void
+  Store: (id: any, area: any, namespace?: string) => IStore
   storeAPI: IStoreAPI
   storageAPI: IStorageAPI
 }
-
-interface MyWindow extends Window {
-  store: any
-}
-
-declare const window: MyWindow
 
 const _: I_ = {
   areas: {},
@@ -99,7 +103,7 @@ const _: I_ = {
 
   // core functions
   Store: function(id, area, namespace?) {
-    const store = _.inherit(_.storeAPI, function(key, data, overwrite) {
+    const store = _.inherit<IStore>(_.storeAPI, function(key, data, overwrite) {
       if (arguments.length === 0) return store.getAll()
       if (data !== undefined) return store.set(key, data, overwrite)
       if (typeof key === 'string' || typeof key === 'number') return store.get(key)
@@ -114,7 +118,7 @@ const _: I_ = {
       area.removeItem(testKey)
     } catch (e) {}
     if (!store._area) {
-      store._area = _.inherit(_.storageAPI, { items: {}, name: 'fake' })
+      store._area = _.inherit<IStorageAPI>(_.storageAPI, { items: {}, name: 'fake' })
     }
     store._ns = namespace || ''
     if (!_.areas[id]) {
@@ -270,8 +274,7 @@ const _: I_ = {
 
 // safely set this up (throws error in IE10/32bit mode for local files)
 const store = _.Store('local', (function(){ try{ return localStorage }catch(e){}})())
-store.local = store // for completeness
 store._ = _ // for extenders and debuggers...
 
 // Export
-export const Store: IStoreAPI = store
+export const Store: IStore = store
