@@ -1,6 +1,6 @@
 {
   "name": "store2",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Better localStorage",
   "keywords": [
     "localStorage",
@@ -22,6 +22,7 @@
     "dist"
   ],
   "main": "dist/cjs/store2.js",
+  "typings": "dist/cjs/store2.d.ts",
   "bugs": {
     "url": "http://github.com/nbubna/store/issues",
     "email": "nathan@esharesearch.com"
