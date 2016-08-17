@@ -1,9 +1,9 @@
-const _ = {
+var _ = {
     areas: {},
     apis: {},
     // utilities
     inherit: function (api, o) {
-        for (let p in api) {
+        for (var p in api) {
             if (!o.hasOwnProperty(p)) {
                 o[p] = api[p];
             }
@@ -25,7 +25,7 @@ const _ = {
     // extension hooks
     fn: function (name, fn) {
         _.storeAPI[name] = fn;
-        for (let api in _.apis) {
+        for (var api in _.apis) {
             _.apis[api][name] = fn;
         }
     },
@@ -37,7 +37,7 @@ const _ = {
     clear: function (area) { area.clear(); },
     // core functions
     Store: function (id, area, namespace) {
-        const store = _.inherit(_.storeAPI, function (key, data, overwrite) {
+        var store = _.inherit(_.storeAPI, function (key, data, overwrite) {
             if (arguments.length === 0)
                 return store.getAll();
             if (data !== undefined)
@@ -84,7 +84,7 @@ const _ = {
             if (!ns) {
                 return this._ns ? this._ns.substring(0, this._ns.length - 1) : '';
             }
-            let store = this[ns];
+            var store = this[ns];
             if (!store || !store.namespace) {
                 store = _.Store(this._id, this._area, this._ns + ns + '.'); // new namespaced api
                 if (!this[ns])
@@ -147,8 +147,8 @@ const _ = {
             }
         },
         setAll: function (data, overwrite) {
-            let changed, val;
-            for (let key in data) {
+            var changed, val;
+            for (var key in data) {
                 val = data[key];
                 if (this.set(key, val, overwrite) !== val)
                     changed = true;
@@ -170,8 +170,8 @@ const _ = {
             return this;
         },
         clearAll: function () {
-            const area = this._area;
-            for (let id in _.areas) {
+            var area = this._area;
+            for (var id in _.areas) {
                 if (_.areas.hasOwnProperty(id)) {
                     this._area = _.areas[id];
                     this.clear();
@@ -198,8 +198,8 @@ const _ = {
         length: 0,
         has: function (k) { return this.items.hasOwnProperty(k); },
         key: function (i) {
-            let c = 0;
-            for (let k in this.items) {
+            var c = 0;
+            for (var k in this.items) {
                 if (this.has(k) && i === c++)
                     return k;
             }
@@ -217,14 +217,14 @@ const _ = {
             }
         },
         getItem: function (k) { return this.has(k) ? this.items[k] : null; },
-        clear: function () { for (let k in this.list) {
+        clear: function () { for (var k in this.list) {
             this.removeItem(k);
         } },
         toString: function () { return this.length + ' items in ' + this.name + 'Storage'; }
     }
 };
 // safely set this up (throws error in IE10/32bit mode for local files)
-const store = _.Store('local', (function () { try {
+var store = _.Store('local', (function () { try {
     return localStorage;
 }
 catch (e) { } })());
@@ -238,5 +238,5 @@ store.local = store;
 // for extenders and debuggers...
 store._ = _;
 // Export
-export const Store = store;
+exports.Store = store;
 //# sourceMappingURL=store2.js.map

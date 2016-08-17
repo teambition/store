@@ -1,10 +1,12 @@
 export interface IStore extends IStoreAPI {
   (key?: string, data?: string, overwrite?: boolean): any
   _?: I_
+  local?: IStore
+  session?: IStore
 }
 
-interface IStoreAPI {
-  area: (id: string, area: IStorageAPI) => IStorageAPI
+export interface IStoreAPI {
+  area: (id: string, area: any) => IStore
   namespace: (ns: string) => IStore
   isFake: () => boolean
   toString: () => string
@@ -26,7 +28,7 @@ interface IStoreAPI {
   _out: (k: any) => any
 }
 
-interface IStorageAPI {
+export interface IStorageAPI {
   length: number
   name?: string
   items?: {}
@@ -39,7 +41,7 @@ interface IStorageAPI {
   toString: () => string
 }
 
-interface I_ {
+export interface I_ {
   areas: {}
   apis: {}
   inherit: <T>(api: Object, o: any) => T
@@ -78,7 +80,7 @@ const _: I_ = {
 
   parse: function(s) {
     // if it doesn't parse, return as is
-    try{ return JSON.parse(s) }catch(e){ return s }
+    try{ return JSON.parse(s) } catch(e) { return s }
   },
 
   // extension hooks
@@ -273,8 +275,13 @@ const _: I_ = {
 }
 
 // safely set this up (throws error in IE10/32bit mode for local files)
-const store = _.Store('local', (function(){ try{ return localStorage }catch(e){}})())
-store._ = _ // for extenders and debuggers...
+const store = _.Store('local', (function(){ try { return localStorage } catch(e) {} })())
+// safely setup store.session (throws exception in FF for file:/// urls)
+store.area('session', (function(){ try { return sessionStorage } catch(e) {} })())
+// for completeness
+store.local = store
+// for extenders and debuggers...
+store._ = _
 
 // Export
 export const Store: IStore = store

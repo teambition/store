@@ -12,7 +12,7 @@ module.exports = function(grunt) {
     },
     shell: {
       ts: {
-        command: 'npm run ts'
+        command: 'npm run build'
       }
     },
     uglify: {
@@ -33,6 +33,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-shell');
 
   // Default task.
-  grunt.registerTask('default', ['clean', 'shell', 'qunit', 'uglify'])
+  grunt.registerTask('default', ['clean', 'shell', 'uglify', 'qunit'])
 
 };

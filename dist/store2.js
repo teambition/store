@@ -236,8 +236,16 @@
         return localStorage;
     }
     catch (e) { } })());
-    store.local = store; // for completeness
-    store._ = _; // for extenders and debuggers...
+    // safely setup store.session (throws exception in FF for file:/// urls)
+    store.area('session', (function () { try {
+        return sessionStorage;
+    }
+    catch (e) { } })());
+    // for completeness
+    store.local = store;
+    // for extenders and debuggers...
+    store._ = _;
     // Export
     exports.Store = store;
 });
+//# sourceMappingURL=store2.js.map
